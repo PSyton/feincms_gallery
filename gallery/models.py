@@ -15,37 +15,37 @@ from feincms.module.medialibrary.models import MediaFile
 class Gallery(models.Model):
     title = models.CharField(max_length=30)
     images = models.ManyToManyField(MediaFile, through='GalleryMediaFile')
-    
+
     def ordered_images(self):
         return self.images.select_related().all().order_by('gallerymediafile__ordering')
-    
+
     def count_images(self):
         return self.images.all().count()
-    
+
     def verbose_images(self):
         count = self.count_images()
         return ungettext_lazy('%(count)d Image', '%(count)d Images', count) % {
                                                 'count': count,}
     verbose_images.short_description = _('Image Count')
-    
+
     class Meta:
         verbose_name = _('Gallery')
         verbose_name_plural = _('Galleries')
-    
+
     def __unicode__(self):
         return self.title
-    
+
 
 class GalleryMediaFile(models.Model):
     gallery = models.ForeignKey(Gallery)
     mediafile = models.ForeignKey(MediaFile)
     ordering = models.IntegerField(default=9999)
-    
+
     class Meta:
         verbose_name = 'Image for Gallery'
         verbose_name_plural = 'Images for Gallery'
         ordering = ['ordering']
-        
+
     def __unicode__(self):
         return u'%s' %self.mediafile
 
@@ -100,9 +100,9 @@ class GalleryContent(models.Model):
         cls.FORM_MEDIA_DICT = FORM_MEDIA_DICT
         cls.paginate_by, cls.orphans, cls.columns = paginate_by, orphans, columns
         cls.TYPE_CHOICES = TYPE_CHOICES
-        
+
         cls.add_to_class('type', models.CharField(max_length=20, choices=TYPE_CHOICES, default='p.div'))
-        
+
     gallery = models.ForeignKey(Gallery, \
         help_text=_('Choose a gallery to render here'),
         related_name='%(app_label)s_%(class)s_gallery')
@@ -116,12 +116,12 @@ class GalleryContent(models.Model):
         if self.FORM_MEDIA_DICT.get('gallery_%s' %self.type, None):
             media.add_css(self.FORM_MEDIA_DICT['gallery_%s'%self.type].get('css', {}))
             media.add_js(self.FORM_MEDIA_DICT['gallery_%s'%self.type].get('js', ''))
-        
+
         return media
-      
+
     def has_pagination(self):
-        return self.type[:2] == 'p.'    
-        
+        return self.type[:2] == 'p.'
+
     class Meta:
         abstract = True
         verbose_name = _('Image Gallery')
@@ -156,8 +156,8 @@ class GalleryContent(models.Model):
                     remaining.append(object)
         else:
             current_page, paginator = None, None
-            images = objects            
-                    
+            images = objects
+
         return render_to_string([
             'content/gallery/%s.html' % self.type,
             'content/gallery/classiclm.html',
